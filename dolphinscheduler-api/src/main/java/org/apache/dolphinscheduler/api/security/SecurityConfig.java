@@ -17,8 +17,12 @@
 
 package org.apache.dolphinscheduler.api.security;
 
-import org.apache.dolphinscheduler.api.security.impl.ldap.LdapAuthenticator;
-import org.apache.dolphinscheduler.api.security.impl.pwd.PasswordAuthenticator;
+import org.apache.dolphinscheduler.api.security.plugins.ldap.LdapAuthenticator;
+import org.apache.dolphinscheduler.api.security.plugins.ldap.LdapLoginCredentials;
+import org.apache.dolphinscheduler.api.security.plugins.oauth2.OAuth2Authenticator;
+import org.apache.dolphinscheduler.api.security.plugins.oauth2.OAuth2LoginCredentials;
+import org.apache.dolphinscheduler.api.security.plugins.pwd.PasswordAuthenticator;
+import org.apache.dolphinscheduler.api.security.plugins.pwd.PasswordLoginCredentials;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,8 +33,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
+// public class SecurityConfig extends WebSecurityConfigurerAdapter {
 public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
@@ -39,6 +48,7 @@ public class SecurityConfig {
     private String type;
 
     private AutowireCapableBeanFactory beanFactory;
+
     private AuthenticationType authenticationType;
 
     @Autowired
@@ -67,11 +77,47 @@ public class SecurityConfig {
             case LDAP:
                 authenticator = new LdapAuthenticator();
                 break;
+            case OAUTH2:
+                authenticator = new OAuth2Authenticator();
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + authenticationType);
         }
         beanFactory.autowireBean(authenticator);
         return authenticator;
+    }
+
+    @Bean
+    public AbstractLoginCredentials loginCredentials() {
+        setAuthenticationType(type);
+        AbstractLoginCredentials credentials;
+        switch (authenticationType) {
+            case PASSWORD:
+                credentials = new PasswordLoginCredentials();
+                break;
+            case LDAP:
+                credentials = new LdapLoginCredentials();
+                break;
+            case OAUTH2:
+                credentials = new OAuth2LoginCredentials();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + authenticationType);
+        }
+        beanFactory.autowireBean(credentials);
+        return credentials;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable().authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+                .oauth2Login()
+                .and().logout().invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .clearAuthentication(true);
+        return http.build();
     }
 
     public String getType() {

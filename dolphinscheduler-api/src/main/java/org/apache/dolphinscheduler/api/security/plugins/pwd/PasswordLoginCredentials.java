@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security.impl.pwd;
+package org.apache.dolphinscheduler.api.security.plugins.pwd;
 
-import org.apache.dolphinscheduler.api.security.impl.AbstractAuthenticator;
-import org.apache.dolphinscheduler.dao.entity.User;
+import org.apache.dolphinscheduler.api.security.AbstractLoginCredentials;
 
-public class PasswordAuthenticator extends AbstractAuthenticator {
+import lombok.Data;
 
-    @Override
-    public User login(String userId, String password, String extra) {
-        return userService.queryUser(userId, password);
-    }
+@Data
+public class PasswordLoginCredentials extends AbstractLoginCredentials {
+
+    public String userId;
+
+    public String password;
+
 }

@@ -15,21 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security;
+package org.apache.dolphinscheduler.api.security.plugins.ldap;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 /**
- * authentication type
+ * ldap user not exist action type
  */
-public enum AuthenticationType {
+public enum LdapUserNotExistActionType {
 
-    PASSWORD(0, "verify via user name and password"),
-    LDAP(1, "verify via LDAP server"),
-    OAUTH2(2, "verify via OAuth2 provider"),
+    CREATE(0, "automatically create user when user not exist"),
+    DENY(1, "deny log-in when user not exist"),
     ;
 
-    AuthenticationType(int code, String desc) {
+    LdapUserNotExistActionType(int code, String desc) {
         this.code = code;
         this.desc = desc;
     }

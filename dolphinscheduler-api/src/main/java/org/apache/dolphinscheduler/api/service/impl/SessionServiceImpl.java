@@ -64,7 +64,6 @@ public class SessionServiceImpl extends BaseServiceImpl implements SessionServic
 
         if (StringUtils.isBlank(sessionId)) {
             Cookie cookie = WebUtils.getCookie(request, Constants.SESSION_ID);
-
             if (cookie != null) {
                 sessionId = cookie.getValue();
             }

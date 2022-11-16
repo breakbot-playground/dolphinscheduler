@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security.impl.ldap;
+package org.apache.dolphinscheduler.api.security.plugins.ldap;
 
-import org.apache.dolphinscheduler.api.security.impl.AbstractAuthenticator;
+import org.apache.dolphinscheduler.api.security.AbstractAuthenticator;
+import org.apache.dolphinscheduler.api.security.AbstractLoginCredentials;
 import org.apache.dolphinscheduler.dao.entity.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,10 @@ public class LdapAuthenticator extends AbstractAuthenticator {
     LdapService ldapService;
 
     @Override
-    public User login(String userId, String password, String extra) {
+    public User login(AbstractLoginCredentials credentials) {
+        final LdapLoginCredentials ldapCredentials = (LdapLoginCredentials) credentials;
+        final String userId = ldapCredentials.getUserId();
+        final String password = ldapCredentials.getPassword();
         User user = null;
         String ldapEmail = ldapService.ldapLogin(userId, password);
         if (ldapEmail != null) {

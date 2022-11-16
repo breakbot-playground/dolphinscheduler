@@ -17,24 +17,10 @@
 
 package org.apache.dolphinscheduler.api.security;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
+import lombok.Data;
 
-/**
- * authentication type
- */
-public enum AuthenticationType {
+@Data
+public class AbstractLoginCredentials {
 
-    PASSWORD(0, "verify via user name and password"),
-    LDAP(1, "verify via LDAP server"),
-    OAUTH2(2, "verify via OAuth2 provider"),
-    ;
-
-    AuthenticationType(int code, String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
-
-    @EnumValue
-    private final int code;
-    private final String desc;
+    public String ip;
 }

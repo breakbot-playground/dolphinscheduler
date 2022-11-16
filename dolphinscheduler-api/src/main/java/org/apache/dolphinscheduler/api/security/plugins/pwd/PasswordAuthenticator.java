@@ -15,25 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security;
+package org.apache.dolphinscheduler.api.security.plugins.pwd;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
+import org.apache.dolphinscheduler.api.security.AbstractAuthenticator;
+import org.apache.dolphinscheduler.api.security.AbstractLoginCredentials;
+import org.apache.dolphinscheduler.dao.entity.User;
 
-/**
- * ldap user not exist action type
- */
-public enum LdapUserNotExistActionType {
+public class PasswordAuthenticator extends AbstractAuthenticator {
 
-    CREATE(0, "automatically create user when user not exist"),
-    DENY(1, "deny log-in when user not exist"),
-    ;
-
-    LdapUserNotExistActionType(int code, String desc) {
-        this.code = code;
-        this.desc = desc;
+    @Override
+    public User login(AbstractLoginCredentials credentials) {
+        final PasswordLoginCredentials passwordLoginCredentials = (PasswordLoginCredentials) credentials;
+        final String userId = passwordLoginCredentials.getUserId();
+        final String password = passwordLoginCredentials.getPassword();
+        return userService.queryUser(userId, password);
     }
-
-    @EnumValue
-    private final int code;
-    private final String desc;
 }

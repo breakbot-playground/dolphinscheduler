@@ -15,26 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security;
+package org.apache.dolphinscheduler.api.security.plugins.oauth2;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
+import org.apache.dolphinscheduler.api.security.AbstractLoginCredentials;
 
-/**
- * authentication type
- */
-public enum AuthenticationType {
+import lombok.Data;
 
-    PASSWORD(0, "verify via user name and password"),
-    LDAP(1, "verify via LDAP server"),
-    OAUTH2(2, "verify via OAuth2 provider"),
-    ;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
-    AuthenticationType(int code, String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
+@Data
+public class OAuth2LoginCredentials extends AbstractLoginCredentials {
 
-    @EnumValue
-    private final int code;
-    private final String desc;
+    public OAuth2User principal;
+
 }

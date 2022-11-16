@@ -24,6 +24,7 @@ import static org.apache.dolphinscheduler.api.enums.Status.USER_LOGIN_FAILURE;
 import org.apache.dolphinscheduler.api.aspect.AccessLogAnnotation;
 import org.apache.dolphinscheduler.api.enums.Status;
 import org.apache.dolphinscheduler.api.exceptions.ApiException;
+import org.apache.dolphinscheduler.api.security.AbstractLoginCredentials;
 import org.apache.dolphinscheduler.api.security.Authenticator;
 import org.apache.dolphinscheduler.api.service.SessionService;
 import org.apache.dolphinscheduler.api.utils.Result;
@@ -39,6 +40,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -60,11 +63,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("")
 public class LoginController extends BaseController {
 
+    private static Logger logger = LoggerFactory.getLogger(LoginController.class);
+
     @Autowired
     private SessionService sessionService;
 
     @Autowired
     private Authenticator authenticator;
+
+    @Autowired
+    private AbstractLoginCredentials credentials;
 
     /**
      * login
@@ -99,8 +107,10 @@ public class LoginController extends BaseController {
             return error(IP_IS_EMPTY.getCode(), IP_IS_EMPTY.getMsg());
         }
 
+        credentials.setIp(ip);
+
         // verify username and password
-        Result<Map<String, String>> result = authenticator.authenticate(userName, userPassword, ip);
+        Result<Map<String, String>> result = authenticator.authenticate(credentials);
         if (result.getCode() != Status.SUCCESS.getCode()) {
             return result;
         }

@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security.impl.ldap;
+package org.apache.dolphinscheduler.api.security.plugins.ldap;
 
-import org.apache.dolphinscheduler.api.security.LdapUserNotExistActionType;
 import org.apache.dolphinscheduler.common.enums.UserType;
 
 import org.apache.commons.lang3.StringUtils;

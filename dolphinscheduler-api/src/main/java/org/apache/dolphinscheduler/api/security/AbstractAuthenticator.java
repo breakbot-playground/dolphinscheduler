@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security.impl;
+package org.apache.dolphinscheduler.api.security;
 
 import org.apache.dolphinscheduler.api.enums.Status;
-import org.apache.dolphinscheduler.api.security.Authenticator;
-import org.apache.dolphinscheduler.api.security.SecurityConfig;
 import org.apache.dolphinscheduler.api.service.SessionService;
 import org.apache.dolphinscheduler.api.service.UsersService;
 import org.apache.dolphinscheduler.api.utils.Result;
@@ -53,17 +51,16 @@ public abstract class AbstractAuthenticator implements Authenticator {
     /**
      * user login and return user in db
      *
-     * @param userId user identity field
-     * @param password user login password
-     * @param extra extra user login field
-     * @return user object in databse
+     * @param credentials user login credentials
+     * @return user object in database
      */
-    public abstract User login(String userId, String password, String extra);
+    public abstract User login(AbstractLoginCredentials credentials);
 
     @Override
-    public Result<Map<String, String>> authenticate(String userId, String password, String extra) {
+    public Result<Map<String, String>> authenticate(AbstractLoginCredentials credentials) {
+        final String ip = credentials.getIp();
         Result<Map<String, String>> result = new Result<>();
-        User user = login(userId, password, extra);
+        User user = login(credentials);
         if (user == null) {
             logger.error("Username or password entered incorrectly.");
             result.setCode(Status.USER_NAME_PASSWD_ERROR.getCode());
@@ -80,7 +77,7 @@ public abstract class AbstractAuthenticator implements Authenticator {
         }
 
         // create session
-        String sessionId = sessionService.createSession(user, extra);
+        String sessionId = sessionService.createSession(user, ip);
         if (sessionId == null) {
             logger.error("Failed to create session, userName:{}.", user.getUserName());
             result.setCode(Status.LOGIN_SESSION_FAILED.getCode());
@@ -92,6 +89,7 @@ public abstract class AbstractAuthenticator implements Authenticator {
 
         Map<String, String> data = new HashMap<>();
         data.put(Constants.SESSION_ID, sessionId);
+        data.put(Constants.SESSION_USER, user.getUserName());
         data.put(Constants.SECURITY_CONFIG_TYPE, securityConfig.getType());
 
         result.setData(data);
@@ -107,6 +105,7 @@ public abstract class AbstractAuthenticator implements Authenticator {
             logger.info("session info is null ");
             return null;
         }
+
         // get user object from session
         return userService.queryUser(session.getUserId());
     }
